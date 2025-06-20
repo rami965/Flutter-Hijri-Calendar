@@ -7,16 +7,13 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:hijri_calendar/Hijri_Calendar/hijri_calendar_builders.dart';
 
 const double _kMonthPickerPortraitWidth = 330.0;
-const double _kMonthPickerLandscapeWidth = 344.0;
 const double _kDatePickerHeaderPortraitHeight = 100.0;
 const double _kDatePickerHeaderLandscapeWidth = 168.0;
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
-const double _kDialogActionBarHeight = 52.0;
-const double _kDatePickerLandscapeHeight = _kMaxDayPickerHeight + _kDialogActionBarHeight;
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
-const Duration _kMonthScrollDuration = const Duration(milliseconds: 200);
+const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 
 /// Signature for predicating dates for enabled date selections.
 ///
@@ -159,6 +156,7 @@ class HijriMonthPicker extends StatefulWidget {
     required this.firstDate,
     required this.lastDate,
     this.selectableDayPredicate,
+    this.daysWithEvents,
     this.builders = const HijriCalendarBuilders(),
   }) : assert(!firstDate.isAfter(lastDate.hYear, lastDate.hMonth, lastDate.hDay));
 
@@ -178,6 +176,9 @@ class HijriMonthPicker extends StatefulWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  /// Optional user list of days with associated.
+  final List<int>? daysWithEvents;
 
   /// Optional custom calendar builders
   final HijriCalendarBuilders builders;
@@ -261,6 +262,7 @@ class _HijriMonthPickerState extends State<HijriMonthPicker> {
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
+      daysWithEvents: widget.daysWithEvents,
       builders: widget.builders,
     );
   }
@@ -417,6 +419,7 @@ class HijriDayPicker extends StatelessWidget {
     required this.firstDate,
     required this.lastDate,
     this.selectableDayPredicate,
+    this.daysWithEvents,
     required this.displayedMonth,
     required this.builders,
   }) : assert(!firstDate.isAfter(lastDate.hYear, lastDate.hMonth, lastDate.hDay)),
@@ -444,6 +447,9 @@ class HijriDayPicker extends StatelessWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate? selectableDayPredicate;
+
+  /// Optional user list of days with associated events.
+  final List<int>? daysWithEvents;
 
   /// Calendar builders
   final HijriCalendarBuilders builders;
@@ -552,7 +558,21 @@ class HijriDayPicker extends StatelessWidget {
                     // formatted full date.
                     label: '$dayText, ${dayToBuild.toString()}',
                     selected: isSelectedDay,
-                    child: ExcludeSemantics(child: Text(dayText, style: itemStyle)),
+                    child: ExcludeSemantics(
+                      child: (daysWithEvents ?? []).contains(day)
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(dayText, style: itemStyle),
+                                Container(
+                                  height: 5,
+                                  width: 5,
+                                  decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red[300]),
+                                ),
+                              ],
+                            )
+                          : Text(dayText, style: itemStyle),
+                    ),
                   ),
                 ),
               )

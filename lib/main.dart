@@ -57,6 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
             });
           },
           selectedDate: selectedDate,
+          daysWithEvents: [13, 14, 15],
         ),
       ),
     );
